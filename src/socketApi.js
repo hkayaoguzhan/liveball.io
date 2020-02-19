@@ -6,6 +6,9 @@ socketApi.io = io;
 
 const users = {  };
 
+//helpers
+const randomColor = require('../helpers/randomColor');
+
 io.on('connection', (socket) => {
     console.log('a user connected');
 
@@ -15,7 +18,8 @@ io.on('connection', (socket) => {
             position: {
                 x: 0,
                 y: 0
-            }
+            },
+            color: randomColor()
         }
         const userData = Object.assign(data, defaultData);
         users[socket.id] = userData; 
@@ -28,6 +32,17 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('disUser', users[socket.id]);
         delete users[socket.id];
     })
+
+    socket.on('animate', (data) => {
+        users[socket.id].position.x = data.x;
+        users[socket.id].position.y = data.y;
+
+        socket.broadcast.emit('animate', { 
+            socketId: socket.id,
+            x: data.x,
+            y: data.y 
+        });
+    });
 });
 
 module.exports = socketApi;
